@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
         if (cardDataSOList != null && cardDataSOList.Count > 0)
         {
             StartLevel(GetLevelReadyCardData());
+            cardManager.GenerateGrid();
         }
     }
 
@@ -25,13 +26,20 @@ public class GameManager : MonoBehaviour
         // such as shuffling the card data list, creating pairs of matching cards, etc.
         List<CardVO> cardsList = new List<CardVO>();
 
+        // assigning incremental index as unique IDs
+        int id = 1;
         foreach (CardData cardData in cardDataSOList[levelIndex].CardDataList)
         {
-            CardVO cardVO = new CardVO(cardData.matchID, cardData.cardSprite);
+            // Increment ID for the next card
+            CardVO cardVO1 = new CardVO(id, cardData.matchID, cardData.cardSprite);
+            id++;
+            
+            CardVO cardVO2 = new CardVO(id, cardData.matchID, cardData.cardSprite);
+            id++;
 
             // Create pairs of matching cards by adding the same card data twice to the list
-            cardsList.Add(cardVO);
-            cardsList.Add(cardVO);
+            cardsList.Add(cardVO1);
+            cardsList.Add(cardVO2);
         }
 
         cardsList.Shuffle();

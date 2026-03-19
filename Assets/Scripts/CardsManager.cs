@@ -22,11 +22,10 @@ public class CardsManager : MonoBehaviour
     private List<CardVO> cardDataList = new List<CardVO>();
     private Dictionary<CardVO, CardView> cardMap = new Dictionary<CardVO, CardView>();
 
-    void Start()
+    void Awake()
     {
         parentRect = GetComponent<RectTransform>();
         gridLayout = GetComponent<GridLayoutGroup>();
-        GenerateGrid();
     }
 
     internal void InitGrid(int cellsPerSide, List<CardVO> cardDataList, Sprite cardBackSprite)
@@ -41,9 +40,10 @@ public class CardsManager : MonoBehaviour
         if (cellsPerSide > 0 && cardPrefab != null && parentRect != null)
         {
             Vector2 parentSize = parentRect.rect.size;
+            int totalCards = cardDataList.Count;
             float cellSize = Mathf.Min(parentSize.x, parentSize.y) / cellsPerSide;
-            int cols = Mathf.Max(cellsPerSide, Mathf.FloorToInt(parentSize.x / cellSize));
-            int rows = Mathf.Max(cellsPerSide, Mathf.FloorToInt(parentSize.y / cellSize));
+            int rows, cols = 0;
+            (rows, cols) = Utilities.CalculateGridDimensions(totalCards, cellsPerSide);
 
             gridLayout.cellSize = Vector2.one * cellSize;
             gridLayout.spacing = Vector2.one * (cellSize * padding);

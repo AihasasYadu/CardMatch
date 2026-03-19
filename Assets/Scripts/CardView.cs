@@ -7,6 +7,7 @@ public class CardView : MonoBehaviour
     [SerializeField]
     private Button buttonRef = null;
 
+    [SerializeField]
     private Image imgRef = null;
     private Func<CardView, CardVO> GetCardData = null;
 

@@ -7,9 +7,10 @@ public class CardVO
     private Sprite cardSprite = null;
     private bool isMatched = false;
 
-    public CardVO(int id, Sprite sprite)
+    public CardVO(int cId, int mId, Sprite sprite)
     {
-        cardID = id;
+        cardID = cId;
+        matchID = mId;
         cardSprite = sprite;
     }
 
@@ -18,7 +19,12 @@ public class CardVO
         return cardSprite;
     }
 
-    public int GetID()
+    public int GetMatchID()
+    {
+        return matchID;
+    }
+
+    public int GetCardID()
     {
         return cardID.Value;
     }
