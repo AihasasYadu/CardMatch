@@ -16,7 +16,7 @@ public class CardDataSO : ScriptableObject
     {
         if (cardDataList != null)
         {
-            if (cardDataList.Select(x => x.cardID).Distinct().Count() != cardDataList.Count)
+            if (cardDataList.Select(x => x.matchID).Distinct().Count() != cardDataList.Count)
             {
                 Debug.LogError("CardDataSO: Duplicate card data found in the list.");
             }

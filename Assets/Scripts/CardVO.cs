@@ -3,6 +3,7 @@ using UnityEngine;
 public class CardVO
 {
     private int? cardID = null;
+    private int matchID = -1;
     private Sprite cardSprite = null;
     private bool isMatched = false;
 

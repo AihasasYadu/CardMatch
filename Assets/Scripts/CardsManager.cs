@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
+using System.Linq;
 
-public class GridManager : MonoBehaviour
+public class CardsManager : MonoBehaviour
 {
     [Header("Grid Settings")]
     [SerializeField]
@@ -16,13 +18,20 @@ public class GridManager : MonoBehaviour
 
     private RectTransform parentRect;
     private GridLayoutGroup gridLayout;
-    private List<CardView> cardsList = new List<CardView>();
+    private List<CardData> cardDataList = new List<CardData>();
+    private Dictionary<CardVO, CardView> cardMap = new Dictionary<CardVO, CardView>();
 
     void Start()
     {
         parentRect = GetComponent<RectTransform>();
         gridLayout = GetComponent<GridLayoutGroup>();
         GenerateGrid();
+    }
+
+    internal void InitGrid(int cellsPerSide, List<CardData> cardDataList)
+    {
+        this.cellsPerSide = cellsPerSide;
+        this.cardDataList = cardDataList;
     }
 
     public void GenerateGrid()
@@ -39,14 +48,20 @@ public class GridManager : MonoBehaviour
 
             gridLayout.constraintCount = cols; // Fixed cols, auto rows
 
+            // using same index for traversing through card data list and
+            // to assign unique ID to each card VO. As the card data list already 
+            // be shuffled and contains pairs of matching cards from Game Manager
+            int index = 0;
+
             for (int row = 0; row < rows; row++)
             {
                 for (int col = 0; col < cols; col++)
                 {
                     CardView cell = Instantiate(cardPrefab, transform);
-                    cell.name = $"Cell_{row}_{col}";
-                    // Optional: Add custom logic here, e.g., cell.GetComponent<Image>().color = GetCellColor(row, col);
-                    cardsList.Add(cell);
+                    cell.name = $"Card_{row}_{col}";
+                    CardVO vo = new CardVO(index, cardDataList[index].cardSprite);
+                    cardMap.Add(vo, cell);
+                    index++;
                 }
             }
         }
@@ -54,10 +69,10 @@ public class GridManager : MonoBehaviour
 
     void ClearGrid()
     {
-        foreach (CardView cell in cardsList)
+        foreach (CardView cell in cardMap.Values)
         {
             if (cell != null) DestroyImmediate(cell);
         }
-        cardsList.Clear();
+        cardMap.Clear();
     }
 }
