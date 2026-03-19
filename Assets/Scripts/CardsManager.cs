@@ -18,7 +18,8 @@ public class CardsManager : MonoBehaviour
 
     private RectTransform parentRect;
     private GridLayoutGroup gridLayout;
-    private List<CardData> cardDataList = new List<CardData>();
+    private Sprite cardBackSprite = null;
+    private List<CardVO> cardDataList = new List<CardVO>();
     private Dictionary<CardVO, CardView> cardMap = new Dictionary<CardVO, CardView>();
 
     void Start()
@@ -28,10 +29,11 @@ public class CardsManager : MonoBehaviour
         GenerateGrid();
     }
 
-    internal void InitGrid(int cellsPerSide, List<CardData> cardDataList)
+    internal void InitGrid(int cellsPerSide, List<CardVO> cardDataList, Sprite cardBackSprite)
     {
         this.cellsPerSide = cellsPerSide;
         this.cardDataList = cardDataList;
+        this.cardBackSprite = cardBackSprite;
     }
 
     public void GenerateGrid()
@@ -57,14 +59,24 @@ public class CardsManager : MonoBehaviour
             {
                 for (int col = 0; col < cols; col++)
                 {
-                    CardView cell = Instantiate(cardPrefab, transform);
-                    cell.name = $"Card_{row}_{col}";
-                    CardVO vo = new CardVO(index, cardDataList[index].cardSprite);
-                    cardMap.Add(vo, cell);
+                    CardView card = Instantiate(cardPrefab, transform);
+                    card.name = $"Card_{row}_{col}";
+                    card.Init(cardBackSprite, GetCardData);
+                    cardMap.Add(cardDataList[index], card);
                     index++;
                 }
             }
         }
+    }
+
+    private CardVO GetCardData(CardView view)
+    {
+        CardVO cardData = null;
+        if (cardMap.ContainsValue(view))
+        {
+            cardData = cardMap.First(kvp => kvp.Value == view).Key;
+        }
+        return cardData;
     }
 
     void ClearGrid()

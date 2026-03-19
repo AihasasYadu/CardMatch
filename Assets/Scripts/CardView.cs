@@ -8,9 +8,9 @@ public class CardView : MonoBehaviour
     private Button buttonRef = null;
 
     private Image imgRef = null;
-    private Func<CardVO> GetCardData = null;
+    private Func<CardView, CardVO> GetCardData = null;
 
-    public void Init(Sprite cardSprite, Func<CardVO> getCardData)
+    public void Init(Sprite cardSprite, Func<CardView, CardVO> getCardData)
     {
         imgRef.sprite = cardSprite;
         GetCardData = getCardData;
@@ -35,7 +35,7 @@ public class CardView : MonoBehaviour
     private void OnCardTap ()
     {
         //Flip Card
-        CardVO card = GetCardData?.Invoke();
+        CardVO card = GetCardData?.Invoke(this);
 
         if (card != null)
         {

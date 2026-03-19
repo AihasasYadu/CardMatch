@@ -15,34 +15,36 @@ public class GameManager : MonoBehaviour
     {
         if (cardDataSOList != null && cardDataSOList.Count > 0)
         {
-            StartGame(GetLevelReadyCardData());
+            StartLevel(GetLevelReadyCardData());
         }
     }
 
-    private List<CardData> GetLevelReadyCardData()
+    private List<CardVO> GetLevelReadyCardData()
     {
         // This method can be used to setup card data for the game, 
         // such as shuffling the card data list, creating pairs of matching cards, etc.
-        List<CardData> cardDataList = new List<CardData>();
+        List<CardVO> cardsList = new List<CardVO>();
 
-        foreach (CardData cardData in cardDataSOList[levelIndex].GetCardDataList())
+        foreach (CardData cardData in cardDataSOList[levelIndex].CardDataList)
         {
+            CardVO cardVO = new CardVO(cardData.matchID, cardData.cardSprite);
+
             // Create pairs of matching cards by adding the same card data twice to the list
-            cardDataList.Add(cardData);
-            cardDataList.Add(cardData);
+            cardsList.Add(cardVO);
+            cardsList.Add(cardVO);
         }
 
-        cardDataList.Shuffle();
+        cardsList.Shuffle();
 
-        return cardDataList;
+        return cardsList;
     }
 
-    private void StartGame(List<CardData> cardDataList)
+    private void StartLevel(List<CardVO> cardsList)
     {
         if (cardManager != null)
         {
-            int cellsPerSide = Mathf.CeilToInt(Mathf.Sqrt(cardDataList.Count));
-            cardManager.InitGrid(cellsPerSide, cardDataList);
+            int cellsPerSide = Mathf.CeilToInt(Mathf.Sqrt(cardsList.Count));
+            cardManager.InitGrid(cellsPerSide, cardsList, cardDataSOList[levelIndex].CardThemeSprite);
         }
     }
 }
