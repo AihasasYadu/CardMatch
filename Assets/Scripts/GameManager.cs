@@ -1,18 +1,27 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static Action TurnComplete = null;
+    public static Action MatchFound = null;
+
     [SerializeField]
     private CardsManager cardManager = null;
 
     [SerializeField]
     private List<CardDataSO> cardDataSOList = null;
 
+    private int turnCount = 0;
+    private int matchedPairsCount = 0;
     private int levelIndex = 0;
 
     public void Start()
     {
+        TurnComplete += HandleTurnComplete;
+        MatchFound += HandleMatchFound;
+
         if (cardDataSOList != null && cardDataSOList.Count > 0)
         {
             StartLevel(GetLevelReadyCardData());
@@ -53,6 +62,31 @@ public class GameManager : MonoBehaviour
         {
             int cellsPerSide = Mathf.CeilToInt(Mathf.Sqrt(cardsList.Count));
             cardManager.InitGrid(cellsPerSide, cardsList, cardDataSOList[levelIndex].CardThemeSprite);
+        }
+    }
+
+    private void HandleTurnComplete()
+    {
+        turnCount++;
+    }
+
+    private void HandleMatchFound()
+    {
+        matchedPairsCount++;
+        if (matchedPairsCount >= cardDataSOList[levelIndex].CardDataList.Count)
+        {
+            // Level complete, move to next level or end game
+            levelIndex++;
+            if (levelIndex < cardDataSOList.Count)
+            {
+                StartLevel(GetLevelReadyCardData());
+                cardManager.GenerateGrid();
+            }
+            else
+            {
+                Debug.Log("Game Completed!");
+                // Implement game completion logic here
+            }
         }
     }
 }

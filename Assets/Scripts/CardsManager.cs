@@ -3,9 +3,12 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Collections;
 
 public class CardsManager : MonoBehaviour
 {
+    public static Action<CardVO> OnCardsTapped = null;
+
     [Header("Grid Settings")]
     [SerializeField]
     public CardView cardPrefab;
@@ -21,11 +24,13 @@ public class CardsManager : MonoBehaviour
     private Sprite cardBackSprite = null;
     private List<CardVO> cardDataList = new List<CardVO>();
     private Dictionary<CardVO, CardView> cardMap = new Dictionary<CardVO, CardView>();
+    private Tuple<CardVO, CardVO> flippedCards = new Tuple<CardVO, CardVO>(null, null);
 
     void Awake()
     {
         parentRect = GetComponent<RectTransform>();
         gridLayout = GetComponent<GridLayoutGroup>();
+        OnCardsTapped += HandleCardsTapped;
     }
 
     internal void InitGrid(int cellsPerSide, List<CardVO> cardDataList, Sprite cardBackSprite)
@@ -72,19 +77,86 @@ public class CardsManager : MonoBehaviour
     private CardVO GetCardData(CardView view)
     {
         CardVO cardData = null;
-        if (cardMap.ContainsValue(view))
+        if (cardMap != null && cardMap.ContainsValue(view))
         {
             cardData = cardMap.First(kvp => kvp.Value == view).Key;
         }
         return cardData;
     }
 
-    void ClearGrid()
+    private void HandleCardsTapped(CardVO card)
+    {
+        if (card != null)
+        {
+            if (flippedCards.Item1 == null)
+            {
+                flippedCards = new Tuple<CardVO, CardVO>(card, null);
+            }
+            else if (flippedCards.Item2 == null)
+            {
+                flippedCards = new Tuple<CardVO, CardVO>(flippedCards.Item1, card);
+                GameManager.TurnComplete?.Invoke();
+                if (CheckForMatch())
+                {
+                    UpdateCardStatus();
+                    ResetFlippedCards();
+                    GameManager.MatchFound?.Invoke();
+                }
+                else
+                {
+                    // No match, flip back cards after a short delay
+                    StartCoroutine(FlipBackCards());
+                    ResetFlippedCards();
+                }
+            }
+        }
+    }
+
+    private bool CheckForMatch()
+    {
+        return flippedCards.Item1.GetMatchID() == flippedCards.Item2.GetMatchID();
+    }
+
+    private void UpdateCardStatus()
+    {
+        flippedCards.Item1.MatchCard();
+        flippedCards.Item2.MatchCard();
+    }
+
+    private IEnumerator FlipBackCards()
+    {
+        if (cardMap != null)
+        {
+            CardVO temp1 = flippedCards.Item1;
+            CardVO temp2 = flippedCards.Item2;
+            yield return new WaitForSeconds(1f);
+            
+            if (temp1 != null)
+            {
+                CardView cardView1 = cardMap[temp1];
+                cardView1.ResetCard(cardBackSprite);
+            }
+
+            if (temp2 != null)
+            {
+                CardView cardView2 = cardMap[temp2];
+                cardView2.ResetCard(cardBackSprite);
+            }
+        }
+    }
+
+    private void ResetFlippedCards()
+    {
+        flippedCards = new Tuple<CardVO, CardVO>(null, null);
+    }
+
+    public void ClearGrid()
     {
         foreach (CardView cell in cardMap.Values)
         {
             if (cell != null) DestroyImmediate(cell);
         }
         cardMap.Clear();
+        flippedCards = new Tuple<CardVO, CardVO>(null, null);
     }
 }

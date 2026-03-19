@@ -9,6 +9,7 @@ public class CardView : MonoBehaviour
 
     [SerializeField]
     private Image imgRef = null;
+    
     private Func<CardView, CardVO> GetCardData = null;
 
     public void Init(Sprite cardSprite, Func<CardView, CardVO> getCardData)
@@ -17,7 +18,7 @@ public class CardView : MonoBehaviour
         GetCardData = getCardData;
     }
 
-    public void Start()
+    public void OnEnable()
     {
         if (buttonRef != null)
         {
@@ -25,22 +26,39 @@ public class CardView : MonoBehaviour
         }
     }
 
-    private void SetCard(CardVO card)
+    public void OnDisable()
     {
-        if (card != null)
+        if (buttonRef != null)
         {
-            imgRef.sprite = card.GetSprite();
+            buttonRef.onClick.RemoveListener(OnCardTap);
+        }
+    }
+
+    private void SetCard(Sprite cardSprite)
+    {
+        if (imgRef != null)
+        {
+            imgRef.sprite = cardSprite;
         }
     }
 
     private void OnCardTap ()
     {
+        buttonRef.interactable = false;
+
         //Flip Card
         CardVO card = GetCardData?.Invoke(this);
-
         if (card != null)
         {
-            SetCard(card);
+            Sprite cardSprite = card.GetSprite();
+            SetCard(cardSprite);
+            CardsManager.OnCardsTapped?.Invoke(card);
         }
+    }
+
+    public void ResetCard(Sprite cardBackSprite)
+    {
+        SetCard(cardBackSprite);
+        buttonRef.interactable = true;
     }
 }
