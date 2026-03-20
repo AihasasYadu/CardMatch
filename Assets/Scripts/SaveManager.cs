@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-public class SaveManager : MonoBehaviour
+public class SaveManager
 {
     private static string saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
 
