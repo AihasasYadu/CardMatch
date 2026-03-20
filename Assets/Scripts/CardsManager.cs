@@ -19,6 +19,9 @@ public class CardsManager : MonoBehaviour
     [SerializeField]
     public float padding = 0.02f;
 
+    [SerializeField] 
+    private PoolManager<CardView> cardPool = null;
+
     private RectTransform parentRect;
     private GridLayoutGroup gridLayout;
     private Sprite cardBackSprite = null;
@@ -31,6 +34,32 @@ public class CardsManager : MonoBehaviour
         parentRect = GetComponent<RectTransform>();
         gridLayout = GetComponent<GridLayoutGroup>();
         OnCardsTapped += HandleCardsTapped;
+        GameManager.OnLevelCompleted += ClearGrid;
+        cardPool = new PoolManager<CardView>(
+            createFunc: () => Instantiate(cardPrefab),
+            onGet: OnCardGet,
+            onRelease: OnCardRelease,
+            onDestroy: OnCardDestroy,
+            collectionCheck: false,
+            defaultCapacity: 20,
+            maxSize: 100
+        );
+    }
+
+    private void OnCardDestroy(CardView card)
+    {
+        Destroy(card.gameObject);
+    }
+
+    private void OnCardRelease(CardView card)
+    {
+        card.ResetCard(cardBackSprite);
+        card.DisableCard();
+    }
+
+    private void OnCardGet(CardView card)
+    {
+        card.ShowCard(this.transform);
     }
 
     internal void InitGrid(int cellsPerSide, List<CardVO> cardDataList, Sprite cardBackSprite)
@@ -64,7 +93,7 @@ public class CardsManager : MonoBehaviour
             {
                 for (int col = 0; col < cols; col++)
                 {
-                    CardView card = Instantiate(cardPrefab, transform);
+                    CardView card = cardPool.Get();
                     card.name = $"Card_{row}_{col}";
                     card.Init(cardBackSprite, GetCardData);
                     cardMap.Add(cardDataList[index], card);
@@ -150,11 +179,14 @@ public class CardsManager : MonoBehaviour
         flippedCards = new Tuple<CardVO, CardVO>(null, null);
     }
 
-    public void ClearGrid()
+    private void ClearGrid()
     {
-        foreach (CardView cell in cardMap.Values)
+        foreach (CardView card in cardMap.Values)
         {
-            if (cell != null) DestroyImmediate(cell);
+            if (card != null)
+            {
+                cardPool.Return(card);
+            }
         }
         cardMap.Clear();
         flippedCards = new Tuple<CardVO, CardVO>(null, null);

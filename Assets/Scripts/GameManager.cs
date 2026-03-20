@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public static Action TurnComplete = null;
     public static Action MatchFound = null;
+    public static Action OnLevelCompleted = null;
+    public static Action OnGameCompleted = null;
 
     [SerializeField]
     private CardsManager cardManager = null;
@@ -21,7 +23,12 @@ public class GameManager : MonoBehaviour
     {
         TurnComplete += HandleTurnComplete;
         MatchFound += HandleMatchFound;
+        UIManager.PlayButtonTapped += OnPlayButtonTapped;
+        UIManager.NextLevelButtonTapped += OnNextLevelButtonTapped;
+    }
 
+    private void OnPlayButtonTapped()
+    {
         if (cardDataSOList != null && cardDataSOList.Count > 0)
         {
             StartLevel(GetLevelReadyCardData());
@@ -68,25 +75,34 @@ public class GameManager : MonoBehaviour
     private void HandleTurnComplete()
     {
         turnCount++;
+        UIManager.TurnsCounterUpdated?.Invoke(turnCount);
     }
 
     private void HandleMatchFound()
     {
         matchedPairsCount++;
-        if (matchedPairsCount >= cardDataSOList[levelIndex].CardDataList.Count)
+        UIManager.MatchesCounterUpdated?.Invoke(matchedPairsCount);
+        if (matchedPairsCount == cardDataSOList[levelIndex].CardDataList.Count)
         {
+            turnCount = 0;
+            matchedPairsCount = 0;
+            OnLevelCompleted?.Invoke();
             // Level complete, move to next level or end game
             levelIndex++;
-            if (levelIndex < cardDataSOList.Count)
-            {
-                StartLevel(GetLevelReadyCardData());
-                cardManager.GenerateGrid();
-            }
-            else
-            {
-                Debug.Log("Game Completed!");
-                // Implement game completion logic here
-            }
+        }
+    }
+
+    private void OnNextLevelButtonTapped()
+    {
+        if (levelIndex < cardDataSOList.Count)
+        {
+            StartLevel(GetLevelReadyCardData());
+            cardManager.GenerateGrid();
+        }
+        else
+        {
+            Debug.Log("Game Completed!");
+            OnGameCompleted?.Invoke();
         }
     }
 }

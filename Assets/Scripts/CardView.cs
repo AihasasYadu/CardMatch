@@ -61,4 +61,15 @@ public class CardView : MonoBehaviour
         SetCard(cardBackSprite);
         buttonRef.interactable = true;
     }
+
+    public void DisableCard()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void ShowCard(Transform parent)
+    {
+        transform.SetParent(parent);
+        gameObject.SetActive(true);
+    }
 }
