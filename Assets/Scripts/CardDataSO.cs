@@ -5,6 +5,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardDataSO", menuName = "ScriptableObjects/CardDataSO", order = 1)]
 public class CardDataSO : ScriptableObject
 {
+    public int scoreMultiplier = 10;
+    public int streakBonusMultiplier = 5;
     public Sprite CardThemeSprite = null;
     public List<CardData> CardDataList = new List<CardData>();
 

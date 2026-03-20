@@ -7,6 +7,7 @@ public class UIManager : MonoBehaviour
 {
     public static Action<int> TurnsCounterUpdated;
     public static Action<int> MatchesCounterUpdated;
+    public static Action<int> ScoreCounterUpdated;
     public static Action PlayButtonTapped;
     public static Action HomeButtonTapped;
     public static Action NextLevelButtonTapped;
@@ -27,6 +28,9 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI matchesCounterText = null;
 
     [SerializeField]
+    private TextMeshProUGUI currentLevelScoreText = null;
+
+    [SerializeField]
     private Button playButton = null;
 
     [SerializeField]
@@ -42,6 +46,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnGameCompleted += ShowMainMenu;
         TurnsCounterUpdated += UpdateTurnsCounter;
         MatchesCounterUpdated += UpdateMatchesCounter;
+        ScoreCounterUpdated += UpdateCurrentLevelScore;
         playButton.onClick.AddListener(OnPlayButtonTapped);
         homeButton.onClick.AddListener(OnHomeButtonTapped);
         nextLevelButton.onClick.AddListener(OnNextLevelButtonTapped);
@@ -58,10 +63,16 @@ public class UIManager : MonoBehaviour
         matchesCounterText.text = $"{matches}";
     }
 
+    private void UpdateCurrentLevelScore(int score)
+    {
+        currentLevelScoreText.text = $"{score}";
+    }
+
     private void ResetCounters()
     {
         UpdateTurnsCounter(0);
         UpdateMatchesCounter(0);
+        UpdateCurrentLevelScore(0);
     }
 
     private void OnPlayButtonTapped()

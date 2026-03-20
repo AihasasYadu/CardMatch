@@ -17,6 +17,10 @@ public class GameManager : MonoBehaviour
 
     private int turnCount = 0;
     private int matchedPairsCount = 0;
+    private int currentLevelScore = 0;
+    private int previousTurnCount = 0;
+    private int previousMatchedPairsCount = 0;
+    private int streakCount = 0;
     private int levelIndex = 0;
 
     public void Start()
@@ -81,6 +85,7 @@ public class GameManager : MonoBehaviour
     private void HandleMatchFound()
     {
         matchedPairsCount++;
+        CheckScore();
         UIManager.MatchesCounterUpdated?.Invoke(matchedPairsCount);
         if (matchedPairsCount == cardDataSOList[levelIndex].CardDataList.Count)
         {
@@ -90,6 +95,25 @@ public class GameManager : MonoBehaviour
             // Level complete, move to next level or end game
             levelIndex++;
         }
+    }
+
+    private void CheckScore()
+    {
+        if (turnCount == previousTurnCount + 1 && matchedPairsCount == previousMatchedPairsCount + 1)
+        {
+            streakCount++;
+        }
+        else
+        {
+            streakCount = 0;
+        }
+
+        int score = (matchedPairsCount * cardDataSOList[levelIndex].scoreMultiplier) + 
+                    (streakCount * cardDataSOList[levelIndex].streakBonusMultiplier);
+        currentLevelScore = score;
+        previousTurnCount = turnCount;
+        previousMatchedPairsCount = matchedPairsCount;
+        UIManager.ScoreCounterUpdated?.Invoke(currentLevelScore);
     }
 
     private void OnNextLevelButtonTapped()
