@@ -19,17 +19,14 @@ public class GameManager : MonoBehaviour
     private int turnCount = 0;
     private int matchedPairsCount = 0;
     private int currentLevelScore = 0;
-    private int previousTurnCount = 0;
-    private int previousMatchedPairsCount = 0;
+    private int previousTurnCount = -1;
+    private int previousMatchedPairsCount = -1;
     private int streakCount = 0;
     private int levelIndex = 0;
 
     public void Start()
     {
         LoadGameData();
-        UIManager.TurnsCounterUpdated?.Invoke(turnCount);
-        UIManager.MatchesCounterUpdated?.Invoke(matchedPairsCount);
-        UIManager.ScoreCounterUpdated?.Invoke(currentLevelScore);
         TurnComplete += HandleTurnComplete;
         MatchFound += HandleMatchFound;
         UIManager.PlayButtonTapped += OnPlayButtonTapped;
@@ -51,8 +48,11 @@ public class GameManager : MonoBehaviour
 
     private void OnPlayButtonTapped()
     {
-        if (cardDataSOList != null && cardDataSOList.Count > 0)
+        if (cardDataSOList != null && cardDataSOList.Count > 0 && levelIndex < cardDataSOList.Count)
         {
+            UIManager.TurnsCounterUpdated?.Invoke(turnCount);
+            UIManager.MatchesCounterUpdated?.Invoke(matchedPairsCount);
+            UIManager.ScoreCounterUpdated?.Invoke(currentLevelScore);
             GenerateLevelReadyCardData();
             StartLevel(currentCardData);
             cardManager.GenerateGrid();
