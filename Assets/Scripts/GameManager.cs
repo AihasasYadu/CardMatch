@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     public void Start()
     {
         LoadGameData();
+        UIManager.TurnsCounterUpdated?.Invoke(turnCount);
+        UIManager.MatchesCounterUpdated?.Invoke(matchedPairsCount);
+        UIManager.ScoreCounterUpdated?.Invoke(currentLevelScore);
         TurnComplete += HandleTurnComplete;
         MatchFound += HandleMatchFound;
         UIManager.PlayButtonTapped += OnPlayButtonTapped;
