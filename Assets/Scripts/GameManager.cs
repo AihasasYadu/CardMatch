@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private List<CardDataSO> cardDataSOList = null;
 
+    private List<CardVO> currentCardData = null;
     private int turnCount = 0;
     private int matchedPairsCount = 0;
     private int currentLevelScore = 0;
@@ -25,46 +26,62 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
+        LoadGameData();
         TurnComplete += HandleTurnComplete;
         MatchFound += HandleMatchFound;
         UIManager.PlayButtonTapped += OnPlayButtonTapped;
         UIManager.NextLevelButtonTapped += OnNextLevelButtonTapped;
     }
 
+    private void LoadGameData()
+    {
+        SaveData savedData = SaveManager.LoadGame();
+        if (savedData != null)
+        {
+            levelIndex = savedData.levelIndex;
+            turnCount = savedData.turnCount;
+            matchedPairsCount = savedData.matchedPairsCount;
+            currentLevelScore = savedData.currentLevelScore;
+            currentCardData = savedData.lastLevelCardData;
+        }
+    }
+
     private void OnPlayButtonTapped()
     {
         if (cardDataSOList != null && cardDataSOList.Count > 0)
         {
-            StartLevel(GetLevelReadyCardData());
+            GenerateLevelReadyCardData();
+            StartLevel(currentCardData);
             cardManager.GenerateGrid();
         }
     }
 
-    private List<CardVO> GetLevelReadyCardData()
+    private void GenerateLevelReadyCardData()
     {
-        // This method can be used to setup card data for the game, 
-        // such as shuffling the card data list, creating pairs of matching cards, etc.
-        List<CardVO> cardsList = new List<CardVO>();
-
-        // assigning incremental index as unique IDs
-        int id = 1;
-        foreach (CardData cardData in cardDataSOList[levelIndex].CardDataList)
+        if (currentCardData == null)
         {
-            // Increment ID for the next card
-            CardVO cardVO1 = new CardVO(id, cardData.matchID, cardData.cardSprite);
-            id++;
-            
-            CardVO cardVO2 = new CardVO(id, cardData.matchID, cardData.cardSprite);
-            id++;
-
-            // Create pairs of matching cards by adding the same card data twice to the list
-            cardsList.Add(cardVO1);
-            cardsList.Add(cardVO2);
+            // This method can be used to setup card data for the game, 
+            // such as shuffling the card data list, creating pairs of matching cards, etc.
+            currentCardData = new List<CardVO>();
+    
+            // assigning incremental index as unique IDs
+            int id = 1;
+            foreach (CardData cardData in cardDataSOList[levelIndex].CardDataList)
+            {
+                // Increment ID for the next card
+                CardVO cardVO1 = new CardVO(id, cardData.matchID, cardData.cardSprite);
+                id++;
+                
+                CardVO cardVO2 = new CardVO(id, cardData.matchID, cardData.cardSprite);
+                id++;
+    
+                // Create pairs of matching cards by adding the same card data twice to the list
+                currentCardData.Add(cardVO1);
+                currentCardData.Add(cardVO2);
+            }
+    
+            currentCardData.Shuffle();
         }
-
-        cardsList.Shuffle();
-
-        return cardsList;
     }
 
     private void StartLevel(List<CardVO> cardsList)
@@ -91,10 +108,12 @@ public class GameManager : MonoBehaviour
         {
             turnCount = 0;
             matchedPairsCount = 0;
+            currentCardData = null;
             OnLevelCompleted?.Invoke();
             // Level complete, move to next level or end game
             levelIndex++;
         }
+        SaveGameData();
     }
 
     private void CheckScore()
@@ -120,7 +139,8 @@ public class GameManager : MonoBehaviour
     {
         if (levelIndex < cardDataSOList.Count)
         {
-            StartLevel(GetLevelReadyCardData());
+            GenerateLevelReadyCardData();
+            StartLevel(currentCardData);
             cardManager.GenerateGrid();
         }
         else
@@ -128,5 +148,17 @@ public class GameManager : MonoBehaviour
             Debug.Log("Game Completed!");
             OnGameCompleted?.Invoke();
         }
+    }
+
+    private void SaveGameData()
+    {
+        SaveManager.SaveGame(new SaveData
+        {
+            levelIndex = levelIndex,
+            turnCount = turnCount,
+            matchedPairsCount = matchedPairsCount,
+            currentLevelScore = currentLevelScore,
+            lastLevelCardData = currentCardData
+        });
     }
 }

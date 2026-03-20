@@ -12,10 +12,11 @@ public class CardView : MonoBehaviour
     
     private Func<CardView, CardVO> GetCardData = null;
 
-    public void Init(Sprite cardSprite, Func<CardView, CardVO> getCardData)
+    public void Init(Sprite cardSprite, bool isMatched, Func<CardView, CardVO> getCardData)
     {
-        imgRef.sprite = cardSprite;
+        SetCard(cardSprite);
         GetCardData = getCardData;
+        buttonRef.interactable = !isMatched;
     }
 
     public void OnEnable()
@@ -50,7 +51,7 @@ public class CardView : MonoBehaviour
         CardVO card = GetCardData?.Invoke(this);
         if (card != null)
         {
-            Sprite cardSprite = card.GetSprite();
+            Sprite cardSprite = card.GetCardSprite;
             SetCard(cardSprite);
             CardsManager.OnCardsTapped?.Invoke(card);
         }

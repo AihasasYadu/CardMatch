@@ -95,7 +95,9 @@ public class CardsManager : MonoBehaviour
                 {
                     CardView card = cardPool.Get();
                     card.name = $"Card_{row}_{col}";
-                    card.Init(cardBackSprite, GetCardData);
+                    bool isMatched = cardDataList[index].IsMatched;
+                    Sprite cardSprite = isMatched ? cardDataList[index].GetCardSprite : cardBackSprite;
+                    card.Init(cardSprite, isMatched, GetCardData);
                     cardMap.Add(cardDataList[index], card);
                     index++;
                 }
@@ -143,13 +145,13 @@ public class CardsManager : MonoBehaviour
 
     private bool CheckForMatch()
     {
-        return flippedCards.Item1.GetMatchID() == flippedCards.Item2.GetMatchID();
+        return flippedCards.Item1.GetMatchID == flippedCards.Item2.GetMatchID;
     }
 
     private void UpdateCardStatus()
     {
-        flippedCards.Item1.MatchCard();
-        flippedCards.Item2.MatchCard();
+        flippedCards.Item1.IsMatched = true;
+        flippedCards.Item2.IsMatched = true;
     }
 
     private IEnumerator FlipBackCards()
